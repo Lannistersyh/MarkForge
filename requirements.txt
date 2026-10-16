@@ -1,0 +1,8 @@
+opencv-python-headless>=4.8
+pillow>=10.0
+
+# optional: OCR backend for text: queries
+# pytesseract>=0.3.10   (also needs the tesseract binary: brew install tesseract)
+
+# optional: screenshot capture & real clicking
+# playwright>=1.40      (then: playwright install chromium)

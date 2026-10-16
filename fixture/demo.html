@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <title>MarkForge 演示页 — L4 视觉 grounding 测试</title>
+    <style>
+      body { margin: 0; min-height: 100vh; display: grid; place-items: center;
+             background: #f5f7fb; color: #10213e;
+             font: 18px -apple-system, BlinkMacSystemFont, sans-serif; }
+      main { width: min(560px, calc(100vw - 48px)); padding: 42px; text-align: center;
+             background: white; border-radius: 22px; box-shadow: 0 18px 50px #19396820; }
+      h1 { margin: 0 0 12px; font-size: 30px; }
+      p { color: #52627c; line-height: 1.6; }
+      .actions { display: grid; gap: 16px; margin: 30px auto; max-width: 320px; }
+      button { padding: 16px 20px; border: 0; border-radius: 12px;
+               color: white; cursor: pointer; font: inherit; font-weight: 700; }
+      #semantic { background: #18794e; }
+      #vision { background: #1769e0; }
+      #danger { background: #c81e1e; }
+      #result { min-height: 30px; font-weight: 700; }
+      .done { color: #087443; }
+    </style>
+  </head>
+  <body>
+    <main>
+      <h1>MarkForge 演示页</h1>
+      <p>本页用于测试 L4 视觉 grounding：绿/蓝按钮可安全点击，
+         红色按钮模拟危险动作（引擎应拒签）。</p>
+      <div class="actions">
+        <button id="semantic" type="button" aria-label="L3 语义确认">L3 语义确认</button>
+        <button id="vision" type="button" aria-label="L4 视觉确认">L4 视觉确认</button>
+        <button id="danger" type="button" aria-label="删除全部数据">删除全部数据</button>
+      </div>
+      <output id="result" aria-live="polite">等待操作</output>
+    </main>
+    <script>
+      const result = document.querySelector('#result');
+      const set = (t) => { result.textContent = t; result.className = 'done'; };
+      document.querySelector('#semantic').addEventListener('click', () =>
+        set('L3 完成：通过语义元素操作成功。'));
+      document.querySelector('#vision').addEventListener('click', () =>
+        set('L4 完成：通过视觉坐标操作成功。'));
+      document.querySelector('#danger').addEventListener('click', () =>
+        set('危险操作已执行（测试页演示，无真实效果）。'));
+    </script>
+  </body>
+</html>
