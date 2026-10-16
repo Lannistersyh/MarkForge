@@ -1,0 +1,5 @@
+-r requirements.txt
+
+# Optional native macOS window capture and keyboard/mouse input.
+pyobjc-framework-Cocoa; sys_platform == "darwin"
+pyobjc-framework-Quartz; sys_platform == "darwin"

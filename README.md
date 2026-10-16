@@ -19,6 +19,50 @@ carries a machine-readable reason. Unlike model-based parsers (OmniParser,
 SeeClick, OS-Atlas), it downloads **nothing**: OpenCV + Pillow is the whole
 stack, and an optional OCR backend degrades gracefully to `none`.
 
+## Continuous computer control
+
+MarkForge also supports a persistent **observe → act → verify** loop. Keep the
+same app/window or browser page alive, execute a short batch of known actions,
+and read the result once rather than taking a screenshot for every keystroke.
+
+- **Computer Use host:** load `scripts/cua-control.mjs` into an existing
+  `cua_repl` session. Semantic observations are the default; request screenshots
+  only when visual grounding is needed.
+- **Standalone macOS:** run a private local worker with
+  `bash scripts/control.sh start --session calc --app com.apple.calculator`.
+  The host needs Screen Recording and Accessibility permissions.
+- **Standalone browser:** use `start --backend browser --url URL` for a
+  user-authorized page. Capture and subsequent actions share one owned page.
+- Up to 16 actions per batch, cached CV detections within an observed frame,
+  Retina coordinate conversion, and explicit partial-failure reporting.
+
+```bash
+# Optional macOS input/screenshot dependencies
+python3 -m pip install -r requirements-macos.txt
+
+bash scripts/control.sh start --session calc --app com.apple.calculator
+bash scripts/control.sh observe --session calc --out /tmp/calc-before.png
+# Use the returned frame_id, then inspect the final observation.
+bash scripts/control.sh act --session calc --frame-id FRAME_ID \
+  --actions '[{"type":"keypress","keys":["1"]},{"type":"keypress","keys":["7"]},{"type":"keypress","keys":["SHIFT","="]},{"type":"keypress","keys":["2"]},{"type":"keypress","keys":["5"]},{"type":"keypress","keys":["ENTER"]}]' \
+  --expect-text 42 --out /tmp/calc-after.png
+bash scripts/control.sh stop --session calc
+```
+
+Select an interpreter with `MARKFORGE_PYTHON` if needed; the launcher recognizes
+an active Conda environment and an Anaconda installation in your home directory.
+The client uses the standard library; the worker keeps CV/UI imports warm.
+
+The Computer Use adapter completed six calculator keystrokes (`17 + 25 = 42`)
+in 627 ms on the development Mac, including final accessibility-state retrieval
+but excluding model inference and outer tool scheduling. This is one smoke test,
+not a comparative latency benchmark. Standalone native input and browser
+end-to-end behavior still need environment-specific validation.
+
+See [the controller guide](docs/continuous-control.md) for both APIs and
+[SKILL.md](SKILL.md) for reusable agent instructions. The full repository is the
+skill bundle; retain its `scripts/` and `markforge/` resources when installing.
+
 ## Why
 
 GUI agents that can only *see* (no DOM, no accessibility tree — desktop apps,
@@ -36,8 +80,7 @@ outlined control — which covers most buttons, toggles, badges and icons in
 real software UIs — and when you need to answer *"why did the agent click
 (639, 495)?"* with evidence.
 
-It implements, in ~700 lines of dependency-light Python, the ideas that the
-research community validated:
+The classic-CV component implements ideas explored by the research community:
 
 - **Set-of-Mark** ([arXiv:2310.11441](https://arxiv.org/abs/2310.11441)) —
   overlay numbered marks so grounding becomes *reference by number*.
@@ -124,8 +167,9 @@ backend; the script falls back to raw CDP via `scripts/cdp-shot.mjs`).
 ## Tests
 
 ```bash
-python3 -m pytest tests/ -v
-# 29 passed, 2 skipped (browser-marked e2e need playwright chromium)
+python3 -m pytest tests/markforge/test_core.py tests/markforge/test_session.py -q
+node --test tests/cua-control.test.mjs
+# 45 Python checks + 4 JavaScript checks; no live desktop input or browser needed
 ```
 
 Includes 8 regression locks from a self-review that caught five real bugs —
