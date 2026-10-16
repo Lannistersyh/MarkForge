@@ -62,6 +62,14 @@ CV 候选用 `observe --detect`，编号图按需用 `--marked-out PATH`，OCR �
 bash scripts/control.sh start --session web --backend browser --url 'https://example.com'
 ```
 
+使用已安装的 Edge 时加 `--channel msedge`，Chrome 使用 `--channel chrome`。例如：
+
+```bash
+bash scripts/control.sh start --session web --backend browser --channel msedge --url 'https://www.selenium.dev/selenium/web/web-form.html'
+```
+
+不指定 channel 时才使用 Playwright 自带的 Chromium。使用现有浏览器安装仍会创建独立测试会话，只保留一个自有页面；结束时用 `stop` 关闭。
+
 仅对用户授权目标使用，不绕过宿主浏览器访问限制。结束时关闭自己的浏览器，不关闭用户原有浏览器或退出 Mac 应用。
 
 ## 会话与失败处理
@@ -76,7 +84,11 @@ bash scripts/control.sh start --session web --backend browser --url 'https://exa
 
 2026-10-16，通过新 `cua-control.mjs` 在 macOS 计算器上一次执行六次按键；界面显示 `17 + 25`，结果 `42`。适配器计时 627 ms，包括执行与最终无障碍状态读取，不包含外层模型思考及工具调度；未做同任务旧版对照。
 
-Python 离线测试覆盖：四次点击只取一张批次后截图、CV 结果复用、错误坐标、失焦、窗口变化、旧帧、中途失败和结果校验。当前 Python 宿主辅助功能检查为未授权，因此独立原生输入尚未实机验收。浏览器适配器尚未做真实页面端到端验收。
+独立 Python 桌面通道现已实机验收：辅助功能授权后，五次语义点击完成 `8 × 9 = 72`，约 278 ms；另一次包含原生键盘事件的七步操作完成 `13 + 29 = 42`，约 223 ms。两次均读取实际界面结果并验证，测试后台进程已退出。
+
+独立浏览器通道使用已安装的 Edge（`--channel msedge`）访问 Selenium 官方公开测试表单，在同一页面连续完成五步输入和点击，最终页面显示 `Form submitted / Received!`，约 599 ms。会话始终只有一个页面，观察次数从 1 变为 2，结束后浏览器、后台进程与 socket 均已清理，原有用户标签未变。该实测不代表所有站点或浏览器安装均已验收。
+
+以上计时包含动作执行和结果读取，不包含外层模型推理、工具调度与初始浏览器启动。Python 离线测试仍覆盖：四次点击只取一张批次后截图、CV 结果复用、错误坐标、失焦、窗口变化、旧帧、中途失败和结果校验。本轮 45 项 Python 检查和 4 项 JavaScript 检查均通过。
 
 ```bash
 python3 -m pytest tests/markforge/test_session.py tests/markforge/test_core.py -q

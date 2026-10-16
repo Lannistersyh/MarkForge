@@ -19,19 +19,24 @@ def decode(png):
 
 class BrowserBackend:
     """An owned page stays alive until stop; DOM and visual actions share it."""
-    def __init__(self, url, *, headless=False):
+    def __init__(self, url, *, headless=False, channel=None):
         from urllib.parse import urlparse
         if urlparse(url).scheme not in ('http', 'https'):
             raise ValueError('browser URL must use http or https')
+        if channel not in (None, 'chrome', 'msedge'):
+            raise ValueError('browser channel must be chrome or msedge')
         from playwright.sync_api import sync_playwright
         self.runtime = sync_playwright().start()
         self.browser = None
         try:
-            self.browser = self.runtime.chromium.launch(headless=headless)
+            options = {'headless': headless}
+            if channel:
+                options['channel'] = channel
+            self.browser = self.runtime.chromium.launch(**options)
             self.browser_context = self.browser.new_context(viewport={'width': 1280, 'height': 900})
             self.page = self.browser_context.new_page()
             self.page.set_default_timeout(2000)
-            self.page.goto(url, wait_until='domcontentloaded')
+            self.page.goto(url, wait_until='domcontentloaded', timeout=15000)
         except BaseException:
             self.close()
             raise

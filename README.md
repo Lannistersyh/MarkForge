@@ -52,12 +52,16 @@ bash scripts/control.sh stop --session calc
 Select an interpreter with `MARKFORGE_PYTHON` if needed; the launcher recognizes
 an active Conda environment and an Anaconda installation in your home directory.
 The client uses the standard library; the worker keeps CV/UI imports warm.
+Use `--channel msedge` for an installed Edge or `--channel chrome` for an
+installed Chrome; leaving the option unset uses bundled Playwright Chromium.
 
 The Computer Use adapter completed six calculator keystrokes (`17 + 25 = 42`)
 in 627 ms on the development Mac, including final accessibility-state retrieval
 but excluding model inference and outer tool scheduling. This is one smoke test,
-not a comparative latency benchmark. Standalone native input and browser
-end-to-end behavior still need environment-specific validation.
+not a comparative latency benchmark. Subsequent live tests also passed for standalone macOS input
+(`8 × 9 = 72` and `13 + 29 = 42`) and installed Edge (the Selenium public
+web form returned `Form submitted / Received!` after a five-action batch).
+These smoke tests do not cover every application, browser installation, or site.
 
 See [the controller guide](docs/continuous-control.md) for both APIs and
 [SKILL.md](SKILL.md) for reusable agent instructions. The full repository is the

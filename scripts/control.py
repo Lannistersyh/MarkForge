@@ -56,7 +56,7 @@ def serve(args):
         bound = False
         try:
             backend = (MacBackend(args.app, window_id=args.window_id) if args.backend == 'mac'
-                       else BrowserBackend(args.url, headless=args.headless))
+                       else BrowserBackend(args.url, headless=args.headless, channel=args.channel))
             session = Session(backend)
             server.bind(str(address))
             bound = True
@@ -131,6 +131,8 @@ def start(args):
         if not args.url:
             raise ValueError('browser backend requires --url')
         command += ['--url', args.url]
+        if args.channel:
+            command += ['--channel', args.channel]
         if args.headless:
             command += ['--headless']
     log_fd = os.open(log_path, os.O_CREAT | os.O_WRONLY | os.O_TRUNC, 0o600)
@@ -165,6 +167,8 @@ def parser():
             p.add_argument('--window-id', type=int)
             p.add_argument('--url')
             p.add_argument('--headless', action='store_true')
+            p.add_argument('--channel', choices=['chrome', 'msedge'],
+                           help='use an installed browser instead of bundled Chromium')
         if name == 'observe':
             p.add_argument('--out')
             p.add_argument('--detect', action='store_true')
@@ -186,6 +190,10 @@ def parser():
 def main():
     args = parser().parse_args()
     if args.command == '_serve':
+        import signal
+        def terminate_worker(signum, frame):
+            raise SystemExit(0)
+        signal.signal(signal.SIGTERM, terminate_worker)
         serve(args)
         return 0
     try:

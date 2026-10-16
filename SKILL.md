@@ -63,7 +63,9 @@ bash scripts/control.sh observe --session calc --out /tmp/calc-before.png
 
 Use the returned frame ID with `act --frame-id ID --actions JSON`. End with
 `stop --session calc`. See [the controller guide](docs/continuous-control.md)
-for the action schema and browser mode. `MARKFORGE_PYTHON` selects an explicit
+for the action schema and browser mode. Use `--channel msedge` for installed
+Edge or `--channel chrome` for installed Chrome instead of bundled Chromium.
+`MARKFORGE_PYTHON` selects an explicit
 interpreter; `requirements-macos.txt` lists native dependencies.
 
 The standalone native host needs Accessibility and Screen Recording permission.
@@ -90,6 +92,6 @@ The legacy `python -m markforge.cli` offline interface remains available.
 - Stop owned workers when done. Idle workers expire after ten minutes; stopping
   never quits the user's native application.
 
-The Computer Use adapter has a real macOS calculator smoke test. Standalone
-native input and the persistent browser backend still require live validation
-in the target environment. Do not describe those paths as fully verified.
+Live smoke tests cover the Computer Use adapter and standalone Python on the
+macOS calculator, plus the installed Edge channel on Selenium's public web form.
+Do not generalize those results to every application, browser, or site.
