@@ -1,5 +1,7 @@
 # MarkForge
 
+[English](README.md) | [简体中文](README.zh-CN.md)
+
 **Deterministic, auditable visual grounding for GUI agents — zero model downloads.**
 
 MarkForge turns "click that button" into an explainable computation. Given only a
